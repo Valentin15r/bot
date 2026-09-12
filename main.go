@@ -3,14 +3,12 @@ package main
 import (
 	"log"
 	"os"
-	"strings"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-// URL твоего сайта с мини-приложением.
-// ВАЖНО: должен быть HTTPS — Telegram не принимает http.
+// Впиши адрес своего сайта. Обязательно HTTPS.
 const webAppURL = "https://example.com/app"
 
 func main() {
@@ -25,8 +23,7 @@ func main() {
 	}
 	log.Printf("Бот запущен: @%s", bot.Self.UserName)
 
-	// Кнопка, открывающая мини-приложение.
-	// Её показываем в /start и по команде /app.
+	// Inline-кнопка, открывающая WebApp
 	webAppButton := tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonWebApp(
@@ -36,8 +33,7 @@ func main() {
 		),
 	)
 
-	// Reply-кнопка (внизу экрана), тоже открывает WebApp.
-	// Работает только в личных чатах.
+	// Reply-кнопка внизу экрана
 	menuButton := tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(
 			tgbotapi.NewKeyboardButtonWebApp(
@@ -61,7 +57,7 @@ func main() {
 			switch msg.Command() {
 			case "start":
 				reply := tgbotapi.NewMessage(msg.Chat.ID,
-					"Привет! 👋\nОткрой мини-приложение кнопкой ниже.")
+					"Привет! 👋 Открой мини-приложение:")
 				reply.ReplyMarkup = webAppButton
 				reply.ReplyToMessageID = msg.MessageID
 				send(bot, reply)
@@ -73,11 +69,7 @@ func main() {
 
 			case "help":
 				send(bot, tgbotapi.NewMessage(msg.Chat.ID,
-					"Команды:\n"+
-						"/start — приветствие + кнопка WebApp\n"+
-						"/app — показать reply-кнопку с приложением\n"+
-						"/help — помощь\n"+
-						"/time — время"))
+					"Команды:\n/start — приветствие\n/app — кнопка приложения\n/time — время"))
 
 			case "time":
 				now := time.Now().Format("02.01.2006 15:04:05")
@@ -89,7 +81,7 @@ func main() {
 			continue
 		}
 
-		// Обработка данных, отправленных из WebApp через Telegram.WebApp.sendData()
+		// Данные из WebApp (sendData)
 		if msg.WebAppData != nil {
 			log.Printf("WebAppData от %d: %s", msg.From.ID, msg.WebAppData.Data)
 			send(bot, tgbotapi.NewMessage(msg.Chat.ID,
